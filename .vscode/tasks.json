@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compilar Debug",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "${workspaceFolder}\\build.cmd", "debug"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": { "base": "$msCompile", "fileLocation": "absolute" },
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Compilar Release",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "${workspaceFolder}\\build.cmd"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": { "base": "$msCompile", "fileLocation": "absolute" },
+      "group": "build"
+    },
+    {
+      "label": "Limpar",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "${workspaceFolder}\\build.cmd", "clean"],
+      "problemMatcher": []
+    }
+  ]
+}

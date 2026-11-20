@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // F5: compiles Debug and runs from build-debug, without installing itself or touching autostart/update.
+      "name": "PrayerApp (Debug)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build-debug/PrayerApp.exe",
+      "args": ["--no-install"],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Compilar Debug",
+      "console": "internalConsole"
+    },
+    {
+      "name": "PrayerApp (Release)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/PrayerApp.exe",
+      "args": ["--no-install"],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Compilar Release",
+      "console": "internalConsole"
+    }
+  ]
+}

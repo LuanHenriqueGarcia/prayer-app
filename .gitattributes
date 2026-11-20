@@ -1,0 +1,4 @@
+# .cmd only runs with CRLF; keep it that way whatever core.autocrlf says.
+*.cmd text eol=crlf
+*.ico binary
+*.png binary

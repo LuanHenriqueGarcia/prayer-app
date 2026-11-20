@@ -1,0 +1,64 @@
+name: Release (nativo C++)
+
+# Manual: Actions -> "Release (nativo C++)" -> Run workflow.
+# Compila com MSVC no Windows e publica a tag v<versão do CMakeLists.txt> com PrayerApp.exe + PrayerApp.exe.sha256,
+# que é o que o auto-update do app procura.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Versão
+        id: ver
+        shell: pwsh
+        run: |
+          $m = Select-String -Path CMakeLists.txt -Pattern 'project\(PrayerApp VERSION (\d+\.\d+\.\d+)'
+          if (-not $m) { throw "Versão não encontrada no CMakeLists.txt" }
+          $v = $m.Matches[0].Groups[1].Value
+          "tag=v$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Versão: v$v"
+
+      - name: Tag ainda não existe
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view ${{ steps.ver.outputs.tag }} *> $null
+          if ($LASTEXITCODE -eq 0) { throw "A release ${{ steps.ver.outputs.tag }} já existe. Suba a versão no CMakeLists.txt." }
+          exit 0
+
+      - name: Compilar (Release)
+        shell: cmd
+        run: build.cmd
+
+      - name: SHA-256
+        shell: pwsh
+        run: |
+          Copy-Item build\PrayerApp.exe PrayerApp.exe
+          $h = (Get-FileHash PrayerApp.exe -Algorithm SHA256).Hash.ToLower()
+          Set-Content PrayerApp.exe.sha256 "$h  PrayerApp.exe" -NoNewline -Encoding ascii
+          Write-Host "SHA-256: $h  ($((Get-Item PrayerApp.exe).Length) bytes)"
+
+      - name: Publicar release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ steps.ver.outputs.tag }} PrayerApp.exe PrayerApp.exe.sha256 `
+            --title "PrayerApp ${{ steps.ver.outputs.tag }}" `
+            --notes "Baixe o **PrayerApp.exe** e dê dois cliques. Ele se instala sozinho (sem admin), abre com o Windows e se atualiza pelas próximas releases."
+
+      - name: PDB (para analisar travamentos)
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrayerApp-${{ steps.ver.outputs.tag }}-pdb
+          path: |
+            build/PrayerApp.pdb
+            build/PrayerApp.map
